@@ -1,23 +1,23 @@
-# yys_auto  
-阴阳师护肝工具  
-  
-####说明####  
-原理：adb命令截图并pull到本地，使用aircv进行图色识别对照获取图片坐标，使用uiautomator2随机点击图片坐标点  
-  
-####安装####  
-1.python3  
-2.adb  
-3.pip install -r requirement.txt  
-  
-####使用####  
-1.需使用数据线连接电脑，并打开adb调试  
-2.可通过同一局域网远程adb调试（修改connect，加入参数{ip}:{port}即可）  
-若要远程不连线手机，执行操作：2.1打开开发者模式 2.2打开wifi调试 2.3先连接数据线，输入adb tcpip 5555 2.4拔线测试，adb connect {ip}  
-3.测试手机尺寸2400x1080。若无法正常识别请自行截图并替换match文件夹下面的图片（注意图片大小与屏幕中大小保持一致）  
-4.在main函数中设定指定任务和次数  
-5.当前目录下命令行运行python yys_auto.py  
-tips:双开请重新建个文件夹，把所有东西放里面，启两个命令行即可  
-  
-####更新####  
-1.0 支持探索、御魂队长/队员模式  
-探索由于怪物在动容易找不到，加入了处理机制，但还是会比较慢  
+yys_auto
+����ʦ���ι���
+
+####˵��####
+ԭ����adb�����ͼ��pull�����أ�ʹ��aircv����ͼɫʶ����ջ�ȡͼƬ���꣬ʹ��uiautomator2������ͼƬ�����
+
+####��װ####
+1.python3
+2.adb
+3.pip install -r requirement.txt
+
+####ʹ��####
+1.��ʹ�����������ӵ��ԣ�����adb����
+2.��ͨ��ͬһ������Զ��adb���ԣ��޸�connect���������{ip}:{port}���ɣ�
+��ҪԶ�̲������ֻ���ִ�в�����2.1�򿪿�����ģʽ 2.2��wifi���� 2.3�����������ߣ�����adb tcpip 5555 2.4���߲��ԣ�adb connect {ip}
+3.�����ֻ��ߴ�2400x1080�����޷�����ʶ�������н�ͼ���滻match�ļ��������ͼƬ��ע��ͼƬ��С����Ļ�д�С����һ�£�
+4.��main�������趨ָ������ʹ���
+5.��ǰĿ¼������������python yys_auto.py
+tips:˫�������½����ļ��У������ж��������棬�����������м���
+
+####����####
+1.0 ֧��̽��������ӳ�/��Աģʽ
+̽�����ڹ����ڶ������Ҳ����������˴������ƣ������ǻ�Ƚ���
