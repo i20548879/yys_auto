@@ -3,6 +3,7 @@ import sys
 from typing import Counter
 import aircv as ac
 import uiautomator2 as u2
+import requests
 import random
 import time
 
@@ -10,21 +11,24 @@ class ScreenMonitor:
     def __init__(self) -> None:
         global d
         #远程连接修改这里
-        d=u2.connect("192.168.137.131:5555")
+        #d=u2.connect("192.168.15.10:5555")
+        d=u2.connect()
         pass
    
 
     def screenshot(self):
         #获取当前截图
         #涉及两台设备则需要-s {serial},可通过adb devices查看serial
-        os.system("adb -s 192.168.137.131:5555 shell screencap -p /sdcard/Download/now.png")
-        os.system("adb -s 192.168.137.131:5555 pull /sdcard/Download/now.png screenshot/now.png >doc.txt 2>&1")
+        #os.system("adb -s 192.168.137.131:5555 shell screencap -p /sdcard/Download/now.jpg")
+        os.system("adb shell screencap -p /sdcard/Download/now.jpg")
+        #os.system("adb -s 192.168.137.131:5555 pull /sdcard/Download/now.jpg screenshot/now.jpg >doc.txt 2>&1")
+        os.system("adb pull /sdcard/Download/now.jpg screenshot/now.jpg")
 
     def clicktarget(self,imgobj,confidencevalue=0.7):
         #识别目标图片在屏幕中的坐标，并点击
         self.screenshot()
         target_img=ac.imread(imgobj)
-        source_img=ac.imread("screenshot/now.png")
+        source_img=ac.imread(r"screenshot/now.jpg")
         match_result = ac.find_template(source_img,target_img,confidencevalue)
         if match_result:
             #获取四个点的坐标
@@ -40,7 +44,7 @@ class ScreenMonitor:
         #在屏幕中找寻对应图片，找到返回True，找不到返回false
         self.screenshot()
         target_img=ac.imread(imgobj)
-        source_img=ac.imread(r"./screenshot/now.png")
+        source_img=ac.imread(r"./screenshot/now.jpg")
         match_result = ac.find_template(source_img,target_img,confidencevalue)
         if match_result:
             return True
@@ -69,7 +73,11 @@ class ScreenMonitor:
                     #找不到小怪则滑动
                     slide_count+=1
                     print('没找到怪物，第%i滑动'%slide_count)
-                    d.swipe_ext("left",2)
+                    startx=random.randint(1500,1600)
+                    starty=random.randint(375,425)
+                    endx=random.randint(900,1000)
+                    endy=random.randint(375,425)
+                    d.swipe(startx,starty,endx,endy)
                 if (slide_count<5):
                     slide_count=0
                     print('找到小怪，攻击')
@@ -119,7 +127,6 @@ class ScreenMonitor:
             wait_count=0
             while(not self.findtarget(r"./match/tiaozhan.png")):
                 wait_count+=1
-                time.sleep(1)
                 if wait_count>=20:
                     #重新邀请
                     print("长时间无响应，重新邀请")
@@ -154,9 +161,25 @@ class ScreenMonitor:
             exe_count+=1
             print("御魂：完成%i/%i"%(exe_count,exe_times))
             
-
+    def test(self):
+        t1=time.time()
+        self.screenshot()
+        t2=time.time()
+        print(t2-t1)
 
 if __name__ == '__main__':
     bot=ScreenMonitor()
-    bot.yuhun_duiyou(100)
+    #bot.test()
+    mode=input("执行功能：\n1.探索\n2.御魂：队长模式\n3.御魂：队员模式\n")
+    exe_count=input("执行次数: ")
+    if mode=='1':
+        bot.tansuo(int(exe_count))
+    elif mode=='2':
+        bot.yuhun_duizhang(int(exe_count))
+    elif mode=='3':
+        bot.yuhun_duiyou(int(exe_count))
+    else:
+        print("请输入正确的数字编号")
     #bot.screenshot()
+    
+    

@@ -1,1 +1,1 @@
-/sdcard/Download/now.png: 1 file pulled, 0 skipped. 5.9 MB/s (1389849 bytes in 0.226s)
+/sdcard/Download/now.jpg: 1 file pulled, 0 skipped. 10.3 MB/s (160229 bytes in 0.015s)
