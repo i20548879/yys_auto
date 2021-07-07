@@ -68,7 +68,7 @@ class ScreenMonitor:
         #多点匹配并点击
         self.screenshot()
         source_img=ac.imread(r"./screenshot.jpg")
-        Resultlist=[ac.find_template(source_img,ac.imread(imgobj),0.8,rgb=True) for imgobj in imglist]
+        Resultlist=[ac.find_template(source_img,ac.imread(imgobj),0.97,rgb=True) for imgobj in imglist]
         findloc=-1
         for loc in range(len(Resultlist)):
             if Resultlist[loc]!=None:
@@ -205,7 +205,7 @@ class ScreenMonitor:
             while(True):
                 #持续识别
                 #findindex=self.multitarget(['./match/shengli.png','./match/jiesuan.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
-                findindex=self.multitarget(['./match/jiesuan_tongji.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
+                findindex=self.multitarget(['./match/jiesuan_tongji1.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
                 if findindex!=-1:
                     break
             if findindex==0:
@@ -246,7 +246,7 @@ class ScreenMonitor:
             while(True):
                 #持续识别
                 #findindex=self.multitarget(['./match/shengli.png','./match/jiesuan.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
-                findindex=self.multitarget(['./match/jiesuan_tongji.png','./match/tiaozhan.png','./match/zhunbei.png','./match/fangjian_wuren.png'])
+                findindex=self.multitarget(['./match/jiesuan_tongji1.png','./match/tiaozhan.png','./match/zhunbei.png','./match/fangjian_wuren.png'])
                 if findindex!=-1:
                     break
             if findindex==0:
@@ -284,21 +284,27 @@ class ScreenMonitor:
                     self.clicktarget(r"./match/yaoqing_jiahao.png")
                     time.sleep(2)
                     self.clicktarget(r"./match/yaoqing_zuijin.png")
+                    time.sleep(2)
                     x=random.randint(780,1150)
                     y=random.randint(270,400)
                     d.click(x,y)
+                    time.sleep(2)
                     self.clicktarget(r"./match/yaoqing_yaoqing.png")
                     last_meiren_time=time.time()
 
 
 
     def test(self):
-        t1=time.time()
-        #loc=self.multitarget(['./match/shengli.png','./match/jiesuan.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
-        print(self.findtarget("./match/fangjian_wuren.png"))
-        t2=time.time()
-        print(t2-t1)
-        #print(loc)
+        print("超时，重新邀请队友")
+        self.clicktarget(r"./match/yaoqing_jiahao.png")
+        time.sleep(2)
+        self.clicktarget(r"./match/yaoqing_zuijin.png")
+        time.sleep(2)
+        x=random.randint(780,1150)
+        y=random.randint(270,400)
+        d.click(x,y)
+        time.sleep(2)
+        self.clicktarget(r"./match/yaoqing_yaoqing.png")
 
 if __name__ == '__main__':
     print('########## yys_auto v1.1 ##########')
