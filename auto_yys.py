@@ -1,35 +1,40 @@
 import os
-import sys
 from typing import Counter
 import aircv as ac
 import uiautomator2 as u2
-import requests
 import random
 import time
 
 class ScreenMonitor:
-    def __init__(self) -> None:
-        global d
+    def __init__(self,serial) -> None:
+        global d,serial_num
+        serial_num=serial
         #远程连接修改这里
         #d=u2.connect("192.168.15.10:5555")
-        d=u2.connect()
+        if '.' in serial_num:
+            #表示是ip地址，远程调试，需要connect
+            os.system("adb connect "+serial_num)
+        d=u2.connect(serial_num)
+        print('连接成功')
         pass
    
 
     def screenshot(self):
         #获取当前截图
         #涉及两台设备则需要-s {serial},可通过adb devices查看serial
-        #os.system("adb -s 192.168.137.131:5555 shell screencap -p /sdcard/Download/now.jpg")
-        os.system("adb shell screencap -p /sdcard/Download/now.jpg")
-        #os.system("adb -s 192.168.137.131:5555 pull /sdcard/Download/now.jpg screenshot/now.jpg >doc.txt 2>&1")
-        os.system("adb pull /sdcard/Download/now.jpg screenshot/now.jpg")
+        if serial_num=='':
+            os.system("adb shell screencap -p /sdcard/Download/screenshot.jpg")
+            os.system("adb pull /sdcard/Download/screenshot.jpg screenshot.jpg > doc.txt")
+        else:
+            os.system("adb -s %s shell screencap -p /sdcard/Download/screenshot.jpg"%serial_num)
+            os.system("adb -s %s pull /sdcard/Download/screenshot.jpg screenshot.jpg > doc.txt"%serial_num)
 
     def clicktarget(self,imgobj,confidencevalue=0.7):
         #识别目标图片在屏幕中的坐标，并点击
         self.screenshot()
         target_img=ac.imread(imgobj)
-        source_img=ac.imread(r"screenshot/now.jpg")
-        match_result = ac.find_template(source_img,target_img,confidencevalue)
+        source_img=ac.imread(r"screenshot.jpg")
+        match_result = ac.find_template(source_img,target_img,confidencevalue,rgb=True)
         if match_result:
             #获取四个点的坐标
             zs,zx,ys,yx=match_result['rectangle']    
@@ -44,9 +49,10 @@ class ScreenMonitor:
         #在屏幕中找寻对应图片，找到返回True，找不到返回false
         self.screenshot()
         target_img=ac.imread(imgobj)
-        source_img=ac.imread(r"./screenshot/now.jpg")
-        match_result = ac.find_template(source_img,target_img,confidencevalue)
+        source_img=ac.imread(r"./screenshot.jpg")
+        match_result = ac.find_template(source_img,target_img,confidencevalue,rgb=True)
         if match_result:
+            print(match_result)
             return True
         else:
             return False
@@ -98,6 +104,7 @@ class ScreenMonitor:
         #御魂 队友模式 先开一把，然后自动同意邀请后开启（也就是队友模式只会管结算界面）
         exe_count=0
         while(exe_count<exe_times):
+            #检测结算
             while(not self.findtarget(r"./match/shengli.png")):
                 if self.findtarget(r"./match/jiesuan.png"):
                     break
@@ -125,7 +132,7 @@ class ScreenMonitor:
         exe_count=0
         while(exe_count<exe_times):
             wait_count=0
-            while(not self.findtarget(r"./match/tiaozhan.png")):
+            while(not self.findtarget(r"./match/tiaozhan.png"),0.97):
                 wait_count+=1
                 if wait_count>=20:
                     #重新邀请
@@ -139,7 +146,8 @@ class ScreenMonitor:
                     self.clicktarget(r"./match/yaoqing_yaoqing.png")
             print("点击挑战")
             self.clicktarget(r"./match/tiaozhan.png")
-            time.sleep(15)
+            #防止没点到，再判断5次（如果点到了这几次的时间也正好在刷御魂，应该不会有人几秒秒刷一把御魂吧，不会吧不会吧）
+            self.wait_click(r"./match/tiaozhan.png",5)
             while(not self.findtarget(r"./match/shengli.png")):
                 if self.findtarget(r"./match/jiesuan.png"):
                     break
@@ -168,18 +176,32 @@ class ScreenMonitor:
         print(t2-t1)
 
 if __name__ == '__main__':
-    bot=ScreenMonitor()
-    #bot.test()
-    mode=input("执行功能：\n1.探索\n2.御魂：队长模式\n3.御魂：队员模式\n")
-    exe_count=input("执行次数: ")
+    print('########## yys_auto v1.0 ##########')
+    connectmode=input("[调试模式]：\n1.单设备USB连接\n2.远程调试/多设备USB连接\n")
+    if connectmode=='2':
+        print('————————————————————')
+        serial=input("[连接设备]请输入ip地址(远程调试)或序列号(多USB设备)\n注意：远程调试请先在命令行测试adb connect [ip]是否能连接\n多设备USB连接请在命令行输入adb devices确认序列号\n")
+    else:
+        serial=''
+    bot=ScreenMonitor(serial)
+    
+    print('————————————————————')
+    mode=input("[执行功能]：\n1.探索\n2.御魂：队长模式\n3.御魂：队员模式\n")
+    exe_count=input("[执行次数]: ")
+    print("若脚本长时间无响应，请自行截图并替换match文件夹下的图片")
     if mode=='1':
+        print("开始探索，请选中探索关卡后开启，让脚本自己点击进入")
         bot.tansuo(int(exe_count))
     elif mode=='2':
+        print("御魂队长模式，请手动开一把后自动邀请队友，此时在房间开启脚本，让脚本自己点击挑战按钮")
         bot.yuhun_duizhang(int(exe_count))
     elif mode=='3':
+        print("御魂队员模式，请手动开一把后点击自动接收邀请，再开启脚本")
         bot.yuhun_duiyou(int(exe_count))
     else:
         print("请输入正确的数字编号")
-    #bot.screenshot()
+    
+    
+    
     
     
