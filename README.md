@@ -1,5 +1,5 @@
-<<<<<<< HEAD
-﻿yys_auto  
+<<<<<<< HEAD yys_auto  
+
 =======
 yys_auto  
 >>>>>>> 8c3ec1a51802c0ae9e5aa7d5277c029d2f508112
