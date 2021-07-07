@@ -1,1 +1,1 @@
-/sdcard/Download/screenshot.jpg: 1 file pulled, 0 skipped. 14.5 MB/s (2280824 bytes in 0.149s)
+/sdcard/Download/screenshot.jpg: 1 file pulled, 0 skipped. 14.6 MB/s (2931488 bytes in 0.191s)

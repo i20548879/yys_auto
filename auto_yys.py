@@ -198,7 +198,8 @@ class ScreenMonitor:
         #御魂 队员模式
         exe_count=0
         #记录时间
-        last_jiesuan_time=last_yaoqing_time=last_zhunbei_time=0
+        last_yaoqing_time=last_zhunbei_time=0
+        last_jiesuan_time=time.time()
         while(exe_count<exe_times):
             findindex=-1
             while(True):
@@ -245,7 +246,7 @@ class ScreenMonitor:
             while(True):
                 #持续识别
                 #findindex=self.multitarget(['./match/shengli.png','./match/jiesuan.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
-                findindex=self.multitarget(['./match/jiesuan_tongji.png','./match/tiaozhan.png','./match/zhunbei.png','./match/fangjian_meiren.png'])
+                findindex=self.multitarget(['./match/jiesuan_tongji.png','./match/tiaozhan.png','./match/zhunbei.png','./match/fangjian_wuren.png'])
                 if findindex!=-1:
                     break
             if findindex==0:
@@ -300,7 +301,7 @@ class ScreenMonitor:
         #print(loc)
 
 if __name__ == '__main__':
-    print('########## yys_auto v1.0 ##########')
+    print('########## yys_auto v1.1 ##########')
     connectmode=input("[调试模式]：\n1.单设备USB连接\n2.远程调试/多设备USB连接\n")
     if connectmode=='2':
         print('————————————————————')
