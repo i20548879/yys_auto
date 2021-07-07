@@ -1,4 +1,4 @@
-<<<<<<< HEAD yys_auto  
+#yys_auto  
 
 =======
 yys_auto  
