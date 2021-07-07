@@ -29,7 +29,7 @@ class ScreenMonitor:
             os.system("adb -s %s shell screencap -p /sdcard/Download/screenshot.jpg"%serial_num)
             os.system("adb -s %s pull /sdcard/Download/screenshot.jpg screenshot.jpg > doc.txt"%serial_num)
 
-    def clicktarget(self,imgobj,confidencevalue=0.7):
+    def clicktarget(self,imgobj,confidencevalue=0.8):
         #识别目标图片在屏幕中的坐标，并点击
         self.screenshot()
         target_img=ac.imread(imgobj)
@@ -45,7 +45,7 @@ class ScreenMonitor:
         else:
             return -1
 
-    def findtarget(self,imgobj,confidencevalue=0.7):
+    def findtarget(self,imgobj,confidencevalue=0.8):
         #在屏幕中找寻对应图片，找到返回True，找不到返回false
         self.screenshot()
         target_img=ac.imread(imgobj)
@@ -57,13 +57,33 @@ class ScreenMonitor:
         else:
             return False
 
-    def wait_click(self,imgobj,confidencevalue=0.7,wait_count=-1):
+    def wait_click(self,imgobj,confidencevalue=0.8,wait_count=-1):
         #持续等待某个图，直到出现,然后点击它,wait_count代表几次等待不到后就退出,-1为无限等
         while(not self.findtarget(imgobj,confidencevalue) and wait_count!=0):
             wait_count-=1
-            time.sleep(5)
         if wait_count!=0:
             self.clicktarget(imgobj,confidencevalue)
+    
+    def multitarget(self,imglist):
+        #多点匹配并点击
+        self.screenshot()
+        source_img=ac.imread(r"./screenshot.jpg")
+        Resultlist=[ac.find_template(source_img,ac.imread(imgobj),0.8,rgb=True) for imgobj in imglist]
+        findloc=-1
+        for loc in range(len(Resultlist)):
+            if Resultlist[loc]!=None:
+                findloc=loc
+                break
+        if findloc!=-1:
+            zs,zx,ys,yx=Resultlist[findloc]['rectangle']
+            x=random.randint(zs[0],ys[0])
+            y=random.randint(zs[1],zx[1])
+            d.click(x,y)
+        return findloc
+        
+        
+
+        
 
     def tansuo(self,exe_times):
         #探索：选完探索章节在探索框处打开（让脚本自己点探索），固定阵容，怪物移动太快了可能点不到，有处理机制不过有点慢
@@ -109,7 +129,7 @@ class ScreenMonitor:
                 if self.findtarget(r"./match/jiesuan.png"):
                     break
                 else:
-                    time.sleep(1)
+                    #time.sleep(1)
                     continue
                 #每2秒检测一次
             #没找到胜利界面就会循环
@@ -125,7 +145,12 @@ class ScreenMonitor:
             d.click(x,y)
             exe_count+=1
             print("御魂：完成%i/%i"%(exe_count,exe_times))
-            time.sleep(20)
+            while(not self.findtarget(r'./match/zidongzhiren.png')):
+                #如果没进入战斗界面（通过左下角自动纸人识别），则说明没进到房间，会等邀请
+                self.wait_click(r'./match/yaoqing_zidong.png',1)
+                self.wait_click(r'./match/yaoqing_feizidong.png',1)
+                self.wait_click(r'./match/zhunbei.png',1)
+            print('战斗中')
 
     def yuhun_duizhang(self,exe_times):
         #御魂 队长模式 先开一把，然后自动邀请队友后开启(会点开始和结算)
@@ -169,11 +194,110 @@ class ScreenMonitor:
             exe_count+=1
             print("御魂：完成%i/%i"%(exe_count,exe_times))
             
+    def yuhun_duiyou_new(self,exe_times):
+        #御魂 队员模式
+        exe_count=0
+        #记录时间
+        last_jiesuan_time=last_yaoqing_time=last_zhunbei_time=0
+        while(exe_count<exe_times):
+            findindex=-1
+            while(True):
+                #持续识别
+                #findindex=self.multitarget(['./match/shengli.png','./match/jiesuan.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
+                findindex=self.multitarget(['./match/jiesuan_tongji.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
+                if findindex!=-1:
+                    break
+            if findindex==0:
+                #识别到胜利和结算
+                pass_jiesuan_time=time.time()-last_jiesuan_time
+                if pass_jiesuan_time>20:
+                    #表示没有重复结算，更新结算时间
+                    last_jiesuan_time=time.time()
+                    print("结算中,本次耗时："+str(pass_jiesuan_time))
+                    exe_count+=1
+                    print("御魂：完成%i/%i"%(exe_count,exe_times))
+                x=random.randint(1700,2200)
+                y=random.randint(880,1000)
+                d.click(x,y)
+                d.click(x,y)
+                
+            elif findindex==1 or findindex==2:
+                #识别到邀请
+                pass_yaoqing_time=time.time()-last_yaoqing_time
+                if pass_yaoqing_time>20:
+                    last_yaoqing_time=time.time()
+                    print("接受邀请")
+            elif findindex==3:
+                #识别到准备
+                pass_zhunbei_time=time.time()-last_zhunbei_time
+                if pass_zhunbei_time>20:
+                    last_zhunbei_time=time.time()
+                    print("准备")
+            
+    def yuhun_duizhang_new(self,exe_times):
+        #御魂 队长模式
+        exe_count=0
+        #记录时间
+        last_yaoqing_time=last_zhunbei_time=0
+        last_jiesuan_time=last_meiren_time=time.time()
+        while(exe_count<exe_times):
+            findindex=-1
+            while(True):
+                #持续识别
+                #findindex=self.multitarget(['./match/shengli.png','./match/jiesuan.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
+                findindex=self.multitarget(['./match/jiesuan_tongji.png','./match/tiaozhan.png','./match/zhunbei.png','./match/fangjian_meiren.png'])
+                if findindex!=-1:
+                    break
+            if findindex==0:
+                #识别到胜利和结算
+                pass_jiesuan_time=time.time()-last_jiesuan_time
+                if pass_jiesuan_time>20:
+                    #表示没有重复结算，更新结算时间
+                    last_jiesuan_time=time.time()
+                    print("结算中,本次耗时："+str(pass_jiesuan_time))
+                    exe_count+=1
+                    print("御魂：完成%i/%i"%(exe_count,exe_times))
+                x=random.randint(1700,2200)
+                y=random.randint(880,1000)
+                d.click(x,y)
+                d.click(x,y)
+                #从结算后开始计算没人的时间
+                last_meiren_time=time.time()
+                
+            elif findindex==1:
+                #识别到挑战
+                pass_yaoqing_time=time.time()-last_yaoqing_time
+                if pass_yaoqing_time>20:
+                    last_yaoqing_time=time.time()
+                    print("点击挑战")
+            elif findindex==2:
+                #识别到准备
+                pass_zhunbei_time=time.time()-last_zhunbei_time
+                if pass_zhunbei_time>20:
+                    last_zhunbei_time=time.time()
+                    print("准备")
+            elif findindex==3:
+                #识别到房间没人
+                if time.time()-last_meiren_time>30:
+                    print("超时，重新邀请队友")
+                    self.clicktarget(r"./match/yaoqing_jiahao.png")
+                    time.sleep(2)
+                    self.clicktarget(r"./match/yaoqing_zuijin.png")
+                    x=random.randint(780,1150)
+                    y=random.randint(270,400)
+                    d.click(x,y)
+                    self.clicktarget(r"./match/yaoqing_yaoqing.png")
+                    last_meiren_time=time.time()
+
+
+
     def test(self):
         t1=time.time()
-        self.screenshot()
+        #loc=self.multitarget(['./match/shengli.png','./match/jiesuan.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
+        print(self.findtarget("./match/fangjian_wuren.png"))
         t2=time.time()
         print(t2-t1)
+        #print(loc)
 
 if __name__ == '__main__':
     print('########## yys_auto v1.0 ##########')
@@ -184,6 +308,8 @@ if __name__ == '__main__':
     else:
         serial=''
     bot=ScreenMonitor(serial)
+    #bot.test()
+    #bot.screenshot()
     
     print('————————————————————')
     mode=input("[执行功能]：\n1.探索\n2.御魂：队长模式\n3.御魂：队员模式\n")
@@ -193,15 +319,12 @@ if __name__ == '__main__':
         print("开始探索，请选中探索关卡后开启，让脚本自己点击进入")
         bot.tansuo(int(exe_count))
     elif mode=='2':
-        print("御魂队长模式，请手动开一把后自动邀请队友，此时在房间开启脚本，让脚本自己点击挑战按钮")
-        bot.yuhun_duizhang(int(exe_count))
+        print("御魂队长模式，请手动开一把后自动邀请队友，此时在房间开启脚本，让脚本自己点击挑战按钮\n支持超时重新邀请队友，需确保需要邀请的队友在最近的第一个位置")
+        bot.yuhun_duizhang_new(int(exe_count))
     elif mode=='3':
-        print("御魂队员模式，请手动开一把后点击自动接收邀请，再开启脚本")
-        bot.yuhun_duiyou(int(exe_count))
+        print("御魂队员模式，可自动接受邀请，建议房间启动防止计时异常")
+        bot.yuhun_duiyou_new(int(exe_count))
     else:
         print("请输入正确的数字编号")
-    
-    
-    
     
     
