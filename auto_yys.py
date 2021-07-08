@@ -214,7 +214,7 @@ class ScreenMonitor:
                 if pass_jiesuan_time>20:
                     #表示没有重复结算，更新结算时间
                     last_jiesuan_time=time.time()
-                    print("结算中,本次耗时："+str(pass_jiesuan_time))
+                    print("结算中,本次耗时：%.2fs"%pass_jiesuan_time)
                     exe_count+=1
                     print("御魂：完成%i/%i"%(exe_count,exe_times))
                 x=random.randint(1700,2200)
@@ -255,7 +255,7 @@ class ScreenMonitor:
                 if pass_jiesuan_time>20:
                     #表示没有重复结算，更新结算时间
                     last_jiesuan_time=time.time()
-                    print("结算中,本次耗时："+str(pass_jiesuan_time))
+                    print("结算中,本次耗时：%.2fs"%pass_jiesuan_time)
                     exe_count+=1
                     print("御魂：完成%i/%i"%(exe_count,exe_times))
                 x=random.randint(1700,2200)
