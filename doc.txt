@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-/sdcard/Download/screenshot.jpg: 1 file pulled, 0 skipped. 14.3 MB/s (1375512 bytes in 0.092s)
-=======
-/sdcard/Download/screenshot.jpg: 1 file pulled, 0 skipped. 13.5 MB/s (1891747 bytes in 0.134s)
->>>>>>> 67f8bf20d29a3eab40e381d487d6ac6efd25f5af
+/sdcard/Download/screenshot.jpg: 1 file pulled, 0 skipped. 14.8 MB/s (3420854 bytes in 0.221s)

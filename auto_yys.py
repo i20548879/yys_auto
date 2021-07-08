@@ -64,8 +64,8 @@ class ScreenMonitor:
         if wait_count!=0:
             self.clicktarget(imgobj,confidencevalue)
     
-    def multitarget(self,imglist,isclick=True):
-        #多点匹配并点击
+    def multitarget(self,imglist,isclick=[]):
+        #多点匹配并点击，isclick表示要点击的img的下标
         self.screenshot()
         source_img=ac.imread(r"./screenshot.jpg")
         Resultlist=[ac.find_template(source_img,ac.imread(imgobj),0.97,rgb=True) for imgobj in imglist]
@@ -74,7 +74,7 @@ class ScreenMonitor:
             if Resultlist[loc]!=None:
                 findloc=loc
                 break
-        if findloc!=-1 and isclick:
+        if findloc!=-1 and (isclick==[] or findloc in isclick):
             zs,zx,ys,yx=Resultlist[findloc]['rectangle']
             x=random.randint(zs[0],ys[0])
             y=random.randint(zs[1],zx[1])
@@ -205,7 +205,7 @@ class ScreenMonitor:
             while(True):
                 #持续识别
                 #findindex=self.multitarget(['./match/shengli.png','./match/jiesuan.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
-                findindex=self.multitarget(['./match/jiesuan_tongji1.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
+                findindex=self.multitarget(['./match/jiesuan_tongji1.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'],[1,2,3])
                 if findindex!=-1:
                     break
             if findindex==0:
@@ -246,7 +246,7 @@ class ScreenMonitor:
             while(True):
                 #持续识别
                 #findindex=self.multitarget(['./match/shengli.png','./match/jiesuan.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
-                findindex=self.multitarget(['./match/jiesuan_tongji1.png','./match/tiaozhan.png','./match/zhunbei.png','./match/fangjian_wuren.png'])
+                findindex=self.multitarget(['./match/jiesuan_tongji1.png','./match/tiaozhan.png','./match/zhunbei.png','./match/fangjian_wuren.png'],[1,2])
                 if findindex!=-1:
                     break
             if findindex==0:
@@ -303,7 +303,7 @@ class ScreenMonitor:
         beat_flag=[1,1,1,1,1,1,1,1,1]
         i=-1
         while(exe_count<exe_times):
-            findindex=self.multitarget(['./match/tupo_jiemian.png','./match/jiesuan.png','./match/shibai.png'])
+            findindex=self.multitarget(['./match/tupo_jiemian.png','./match/jiesuan.png','./match/shibai.png'],[1,2])
             if findindex==0:
                 try:
                     #找到第一个为1的偏移
@@ -344,7 +344,7 @@ class ScreenMonitor:
                     print('突破执行%i/%i'%(exe_count,exe_times))
                     time.sleep(5)
             elif findindex==2:
-                beat_flag[i]=0
+                beat_flag[i]=-1
                 print('目标%i进攻失败'%(i+1))
                 time.sleep(5)
                 
@@ -362,9 +362,9 @@ class ScreenMonitor:
         self.clicktarget(r"./match/yaoqing_yaoqing.png")
 
 if __name__ == '__main__':
-    print('########## yys_auto v1.2 ##########')
+    print('########## yys_auto v1.3 ##########')
     print('模拟器请设置分辨率为1080×2400')
-    connectmode=input("[调试模式]：\n1.单设备USB连接\n2.远程调试/多设备USB连接\n")
+    connectmode=input("[调试模式]：\n1.模拟器/单设备USB连接\n2.远程调试/多设备USB连接\n")
     if connectmode=='2':
         print('————————————————————')
         serial=input("[连接设备]请输入ip地址(远程调试)或序列号(多USB设备)\n注意：远程调试请先在命令行测试adb connect [ip]是否能连接\n多设备USB连接请在命令行输入adb devices确认序列号\n")
