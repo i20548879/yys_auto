@@ -7,6 +7,7 @@
 1.python3  
 2.adb  
 3.pip install -r requirement.txt  
+(不懂安装python和adb的请自行百度)
   
 ## 使用
 1.需使用数据线连接电脑，并在开发者模式下打开adb调试、USB安装
