@@ -64,17 +64,17 @@ class ScreenMonitor:
         if wait_count!=0:
             self.clicktarget(imgobj,confidencevalue)
     
-    def multitarget(self,imglist):
+    def multitarget(self,imglist,isclick=True):
         #多点匹配并点击
         self.screenshot()
         source_img=ac.imread(r"./screenshot.jpg")
-        Resultlist=[ac.find_template(source_img,ac.imread(imgobj),0.8,rgb=True) for imgobj in imglist]
+        Resultlist=[ac.find_template(source_img,ac.imread(imgobj),0.97,rgb=True) for imgobj in imglist]
         findloc=-1
         for loc in range(len(Resultlist)):
             if Resultlist[loc]!=None:
                 findloc=loc
                 break
-        if findloc!=-1:
+        if findloc!=-1 and isclick:
             zs,zx,ys,yx=Resultlist[findloc]['rectangle']
             x=random.randint(zs[0],ys[0])
             y=random.randint(zs[1],zx[1])
@@ -205,7 +205,7 @@ class ScreenMonitor:
             while(True):
                 #持续识别
                 #findindex=self.multitarget(['./match/shengli.png','./match/jiesuan.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
-                findindex=self.multitarget(['./match/jiesuan_tongji.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
+                findindex=self.multitarget(['./match/jiesuan_tongji1.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
                 if findindex!=-1:
                     break
             if findindex==0:
@@ -246,7 +246,7 @@ class ScreenMonitor:
             while(True):
                 #持续识别
                 #findindex=self.multitarget(['./match/shengli.png','./match/jiesuan.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
-                findindex=self.multitarget(['./match/jiesuan_tongji.png','./match/tiaozhan.png','./match/zhunbei.png','./match/fangjian_wuren.png'])
+                findindex=self.multitarget(['./match/jiesuan_tongji1.png','./match/tiaozhan.png','./match/zhunbei.png','./match/fangjian_wuren.png'])
                 if findindex!=-1:
                     break
             if findindex==0:
@@ -284,24 +284,86 @@ class ScreenMonitor:
                     self.clicktarget(r"./match/yaoqing_jiahao.png")
                     time.sleep(2)
                     self.clicktarget(r"./match/yaoqing_zuijin.png")
+                    time.sleep(2)
                     x=random.randint(780,1150)
                     y=random.randint(270,400)
                     d.click(x,y)
+                    time.sleep(2)
                     self.clicktarget(r"./match/yaoqing_yaoqing.png")
                     last_meiren_time=time.time()
 
-
+    def tupo(self,exe_times):
+        #突破
+        exe_count=0
+        #九宫格坐标
+        location=[(600,900,220,390),(1100,1400,220,390),(1600,1900,220,390),
+        (600,900,430,600),(1100,1400,430,600),(1600,1900,430,600),
+        (600,900,650,800),(1100,1400,650,800),(1600,1900,650,800)]
+        #记录9个目标是否进攻过或失败过
+        beat_flag=[1,1,1,1,1,1,1,1,1]
+        i=-1
+        while(exe_count<exe_times):
+            findindex=self.multitarget(['./match/tupo_jiemian.png','./match/jiesuan.png','./match/shibai.png'])
+            if findindex==0:
+                try:
+                    #找到第一个为1的偏移
+                    i=beat_flag.index(1)
+                except:
+                    #所有对象都处理过了
+                    if self.findtarget('./match/tupo_jilu.png'):
+                        print('全部击破，已自动刷新')
+                    else:
+                        print('手动刷新')
+                        self.wait_click('./match/tupo_shuaxin.png')
+                        time.sleep(5)
+                        self.clicktarget('./match/confirm.png')
+                        time.sleep(5)
+                    beat_flag=[1,1,1,1,1,1,1,1,1]
+                    continue
+                print('选择第%i个目标'%(i+1))
+                click_count=0
+                is_enter=-1
+                while(click_count<3 and is_enter==-1):
+                    d.click(random.randint(location[i][0],location[i][1]),random.randint(location[i][2],location[i][3]))
+                    time.sleep(3)
+                    click_count+=1
+                    is_enter=self.clicktarget('./match/tupo_jingong.png')
+                if is_enter==-1:
+                    #表示打过了，所以点不出进攻
+                    print("已击破的目标")
+                    beat_flag[i]=0
+                else:
+                    #表示点到了进攻
+                    print('开始进攻')
+                    last_time=time.time()
+            elif findindex==1:
+                if time.time()-last_time>15:
+                    exe_count+=1
+                    beat_flag[i]=0
+                    print('目标%i进攻成功'%(i+1))
+                    print('突破执行%i/%i'%(exe_count,exe_times))
+                    time.sleep(5)
+            elif findindex==2:
+                beat_flag[i]=0
+                print('目标%i进攻失败'%(i+1))
+                time.sleep(5)
+                
 
     def test(self):
-        t1=time.time()
-        #loc=self.multitarget(['./match/shengli.png','./match/jiesuan.png','./match/yaoqing_zidong.png','./match/yaoqing_feizidong.png','./match/zhunbei.png'])
-        print(self.findtarget("./match/fangjian_wuren.png"))
-        t2=time.time()
-        print(t2-t1)
-        #print(loc)
+        print("超时，重新邀请队友")
+        self.clicktarget(r"./match/yaoqing_jiahao.png")
+        time.sleep(2)
+        self.clicktarget(r"./match/yaoqing_zuijin.png")
+        time.sleep(2)
+        x=random.randint(780,1150)
+        y=random.randint(270,400)
+        d.click(x,y)
+        time.sleep(2)
+        self.clicktarget(r"./match/yaoqing_yaoqing.png")
 
 if __name__ == '__main__':
-    print('########## yys_auto v1.1 ##########')
+    print('########## yys_auto v1.2 ##########')
+    print('模拟器请设置分辨率为1080×2400')
     connectmode=input("[调试模式]：\n1.单设备USB连接\n2.远程调试/多设备USB连接\n")
     if connectmode=='2':
         print('————————————————————')
@@ -313,7 +375,7 @@ if __name__ == '__main__':
     #bot.screenshot()
     
     print('————————————————————')
-    mode=input("[执行功能]：\n1.探索\n2.御魂：队长模式\n3.御魂：队员模式\n")
+    mode=input("[执行功能]：\n1.探索\n2.御魂：队长模式\n3.御魂：队员模式\n4.结界突破\n")
     exe_count=input("[执行次数]: ")
     print("若脚本长时间无响应，请自行截图并替换match文件夹下的图片")
     if mode=='1':
@@ -325,6 +387,9 @@ if __name__ == '__main__':
     elif mode=='3':
         print("御魂队员模式，可自动接受邀请，建议房间启动防止计时异常")
         bot.yuhun_duiyou_new(int(exe_count))
+    elif mode=='4':
+        print("结界突破，锁定阵容后在突破界面打开")
+        bot.tupo(int(exe_count))
     else:
         print("请输入正确的数字编号")
     
