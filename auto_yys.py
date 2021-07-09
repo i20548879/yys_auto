@@ -120,80 +120,6 @@ class ScreenMonitor:
             self.wait_click(r"./match/confirm.png",5)
             print("探索：完成%i/%i"%(exe_count,exe_times))
 
-    def yuhun_duiyou(self,exe_times):
-        #御魂 队友模式 先开一把，然后自动同意邀请后开启（也就是队友模式只会管结算界面）
-        exe_count=0
-        while(exe_count<exe_times):
-            #检测结算
-            while(not self.findtarget(r"./match/shengli.png")):
-                if self.findtarget(r"./match/jiesuan.png"):
-                    break
-                else:
-                    #time.sleep(1)
-                    continue
-                #每2秒检测一次
-            #没找到胜利界面就会循环
-            print("结算中")
-            x=random.randint(1700,2200)
-            y=random.randint(880,1000)
-            d.click(x,y)
-            d.click(x,y)
-            time.sleep(3)
-            x=random.randint(1700,2200)
-            y=random.randint(880,1000)
-            d.click(x,y)
-            d.click(x,y)
-            exe_count+=1
-            print("御魂：完成%i/%i"%(exe_count,exe_times))
-            while(not self.findtarget(r'./match/zidongzhiren.png')):
-                #如果没进入战斗界面（通过左下角自动纸人识别），则说明没进到房间，会等邀请
-                self.wait_click(r'./match/yaoqing_zidong.png',1)
-                self.wait_click(r'./match/yaoqing_feizidong.png',1)
-                self.wait_click(r'./match/zhunbei.png',1)
-            print('战斗中')
-
-    def yuhun_duizhang(self,exe_times):
-        #御魂 队长模式 先开一把，然后自动邀请队友后开启(会点开始和结算)
-        exe_count=0
-        while(exe_count<exe_times):
-            wait_count=0
-            while(not self.findtarget(r"./match/tiaozhan.png"),0.97):
-                wait_count+=1
-                if wait_count>=20:
-                    #重新邀请
-                    print("长时间无响应，重新邀请")
-                    self.clicktarget(r"./match/yaoqing_jiahao.png")
-                    time.sleep(2)
-                    self.clicktarget(r"./match/yaoqing_zuijin.png")
-                    x=random.randint(780,1150)
-                    y=random.randint(270,400)
-                    d.click(x,y)
-                    self.clicktarget(r"./match/yaoqing_yaoqing.png")
-            print("点击挑战")
-            self.clicktarget(r"./match/tiaozhan.png")
-            #防止没点到，再判断5次（如果点到了这几次的时间也正好在刷御魂，应该不会有人几秒秒刷一把御魂吧，不会吧不会吧）
-            self.wait_click(r"./match/tiaozhan.png",5)
-            while(not self.findtarget(r"./match/shengli.png")):
-                if self.findtarget(r"./match/jiesuan.png"):
-                    break
-                else:
-                    #time.sleep(1)
-                    continue
-                #每秒检测一次
-            #没找到胜利界面就会循环
-            print("结算中")
-            x=random.randint(1700,2200)
-            y=random.randint(880,1000)
-            d.click(x,y)
-            d.click(x,y)
-            time.sleep(3)
-            x=random.randint(1700,2200)
-            y=random.randint(880,1000)
-            d.click(x,y)
-            d.click(x,y)
-            exe_count+=1
-            print("御魂：完成%i/%i"%(exe_count,exe_times))
-            
     def yuhun_duiyou_new(self,exe_times):
         #御魂 队员模式
         exe_count=0
@@ -349,6 +275,79 @@ class ScreenMonitor:
                 print('目标%i进攻失败'%(i+1))
                 time.sleep(5)
                 
+    def danshua_tj(self,exe_times,danshua_mode):
+        #一些单刷结算带统计的副本，目前支持业原火(想要其他单刷的自行截图)
+        exe_count=0
+        tiaozhan_time=0
+        if danshua_mode=='1':
+            #贪
+            tiaozhan_img='./match/yeyuanhuo_tan.png'
+        elif danshua_mode=='2':
+            #嗔
+            tiaozhan_img='./match/yeyuanhuo_chen.png'
+        elif danshua_mode=='3':
+            #痴
+            tiaozhan_img='./match/yeyuanhuo_chi.png'
+        while(exe_count<exe_times):
+            findloc=self.multitarget([tiaozhan_img,'./match/jiesuan_tongji.png'],isclick=[0])
+            #没有加失败的处理是因为失败也会有统计条，可以一并处理
+            if findloc==0:
+                if time.time()-tiaozhan_time>15:
+                    #挑战时间从上一次点挑战开始计时
+                    print('点击挑战')
+                    tiaozhan_time=last_time=time.time()
+            elif findloc==1:
+                x=random.randint(1700,2200)
+                y=random.randint(800,1000)
+                d.click(x,y)
+                d.click(x,y)
+                if time.time()-last_time>15:
+                    #last_time从开始挑战计时，防止重复结算
+                    last_time=time.time()
+                    exe_count+=1
+                    print('副本完成%i/%i'%(exe_count,exe_times))
+    
+    def danshua_wtj(self,exe_times,danshua_mode):
+        #一些单刷结算不带统计的副本，目前支持御灵，结算有点慢
+        exe_count=0
+        tiaozhan_time=0
+        if danshua_mode=='1':
+            #御灵
+            tiaozhan_img='./match/yuling_start.png'
+        elif danshua_mode=='2':
+            #待加入
+            tiaozhan_img='xx'
+        elif danshua_mode=='3':
+            #待加入
+            tiaozhan_img='xx'
+        while(exe_count<exe_times):
+            findloc=self.multitarget([tiaozhan_img,'./match/jiesuan.png','./match/shibai.png'],isclick=[0])
+            if findloc==0:
+                if time.time()-tiaozhan_time>15:
+                    #挑战时间从上一次点挑战开始计时
+                    print('点击挑战')
+                    tiaozhan_time=last_time=time.time()
+            elif findloc==1:
+                x=random.randint(1700,2200)
+                y=random.randint(800,1000)
+                d.click(x,y)
+                d.click(x,y)
+                if time.time()-last_time>15:
+                    #last_time从开始挑战计时，防止重复结算
+                    last_time=time.time()
+                    exe_count+=1
+                    print('副本完成%i/%i'%(exe_count,exe_times))
+            elif findloc==2:
+                x=random.randint(1700,2200)
+                y=random.randint(800,1000)
+                d.click(x,y)
+                d.click(x,y)
+                if time.time()-last_time>15:
+                    #last_time从开始挑战计时，防止重复结算
+                    last_time=time.time()
+                    exe_count+=1
+                    print('失败')
+            
 
     def test(self):
         print("超时，重新邀请队友")
@@ -363,7 +362,7 @@ class ScreenMonitor:
         self.clicktarget(r"./match/yaoqing_yaoqing.png")
 
 if __name__ == '__main__':
-    print('########## yys_auto v1.3 ##########')
+    print('########## yys_auto v1.5 ##########')
     print('模拟器请设置分辨率为1080×2400')
     connectmode=input("[调试模式]：\n1.模拟器/单设备USB连接\n2.远程调试/多设备USB连接\n")
     if connectmode=='2':
@@ -376,22 +375,35 @@ if __name__ == '__main__':
     #bot.screenshot()
     
     print('————————————————————')
-    mode=input("[执行功能]：\n1.探索\n2.御魂：队长模式\n3.御魂：队员模式\n4.结界突破\n")
+    mode=input("[执行功能]：\n1.探索\n2.御魂：队长模式\n3.御魂：队员模式\n4.结界突破\n5.业原火\n6.御灵\n输入:")
     exe_count=input("[执行次数]: ")
     print("若脚本长时间无响应，请自行截图并替换match文件夹下的图片")
+    start_time=time.time()
     if mode=='1':
         print("开始探索，请选中探索关卡后开启，让脚本自己点击进入")
         bot.tansuo(int(exe_count))
     elif mode=='2':
-        print("御魂队长模式，请手动开一把后自动邀请队友，此时在房间开启脚本，让脚本自己点击挑战按钮\n支持超时重新邀请队友，需确保需要邀请的队友在最近的第一个位置")
+        print("御魂(大蛇/日轮) 队长模式，请手动开一把后自动邀请队友，此时在房间开启脚本，让脚本自己点击挑战按钮\n支持超时重新邀请队友，需确保需要邀请的队友在最近的第一个位置")
         bot.yuhun_duizhang_new(int(exe_count))
     elif mode=='3':
-        print("御魂队员模式，可自动接受邀请，建议房间启动防止计时异常")
+        print("御魂(大蛇/日轮) 队员模式，可自动接受邀请，建议房间启动防止计时异常")
         bot.yuhun_duiyou_new(int(exe_count))
     elif mode=='4':
         print("结界突破，锁定阵容后在突破界面打开")
         bot.tupo(int(exe_count))
+    elif mode=='5':
+        danshua_mode=input("业原火\n请先进入界面后锁定阵容;\n选择执行模式:1.贪之阵 2.嗔之阵 3.痴之阵\n输入:")
+        bot.danshua_tj(int(exe_count),danshua_mode)
+    elif mode=='6':
+        #danshua_mode=input("单刷模式\n请先进入界面后锁定阵容;\n选择执行模式:1.御灵 2.待加入 3.待加入\n输入:")
+        print('御灵\n请先进入界面后锁定阵容')
+        bot.danshua_wtj(int(exe_count),danshua_mode='1')
     else:
         print("请输入正确的数字编号")
+    endtime=time.time()
+    seconds=endtime-start_time
+    m,s=divmod(seconds,60)
+    h,m=divmod(m,60)
+    print('任务结束,执行耗时:%i小时 %i分钟 %i秒\n'%(h,m,s))
     
     
