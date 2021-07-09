@@ -310,6 +310,7 @@ class ScreenMonitor:
                     i=beat_flag.index(1)
                 except:
                     #所有对象都处理过了
+                    time.sleep(5)
                     if self.findtarget('./match/tupo_jilu.png'):
                         print('全部击破，已自动刷新')
                     else:
